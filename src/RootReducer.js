@@ -24,14 +24,16 @@ const rootReducer = (state, action) => {
       return {
         ...state,
         isPlayingAdd: true,
-        isPaused: true
+        isPaused: true,
+        currentAd: action.data
       };
     case 'FINISHED_AD':
       return {
         ...state,
-        hasAdBeenPlayed: true,
         isPlayingAdd: false,
-        isPaused: false
+        isPaused: false,
+        adStates: action.data,
+        currentAd: null
       };
     case 'UPDATE_AD_TIME':
       return {
