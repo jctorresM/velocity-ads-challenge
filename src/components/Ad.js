@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { Context } from '../App';
 const adImgURL = process.env.PUBLIC_URL + '/AdBreak21-9.jpg';
 
-const Ad = ({ videoRef }) => {
+const Ad = ({ onAdClosing }) => {
   const { dispatch, state } = useContext(Context);
 
   /**
@@ -10,12 +10,20 @@ const Ad = ({ videoRef }) => {
    * the remaining time of the AD every second until it reaches 0
    */
   const initAdCountdown = () => {
+    let adRemainingTime = state.currentAd.duration;
+    dispatch({ type: 'UPDATE_AD_TIME', data: adRemainingTime });
     const adCountdown = setInterval(function () {
-      dispatch({ type: 'UPDATE_AD_TIME', data: state.adRemainingTime - 1 });
-      if (state.adRemainingTime === 0) {
+      adRemainingTime -= 1;
+      dispatch({ type: 'UPDATE_AD_TIME', data: adRemainingTime });
+
+      if (adRemainingTime === 0) { 
         // resume video and dispatch action when ad countdown is 0
-        videoRef.current.play();
-        dispatch({ type: 'FINISHED_AD' });
+        const adState = state.adsState.find(a => a.start === state.currentAd.start);
+        adState.hasAdBeenPlayed = true;
+        dispatch({ type: 'FINISHED_AD', data: state.adsState });
+
+        onAdClosing();
+
         clearInterval(adCountdown);
       }
     }, 1000);
@@ -32,12 +40,12 @@ const Ad = ({ videoRef }) => {
     return () => {
       clearInterval(adCountdown);
     }
-  }, [state]);
+  }, []);
 
   return (
     <>
       <img style={styles.ad} src={adImgURL} alt='Advertisement' />
-      <h3 style={styles.chronometer}>Ad closes in {state.adRemainingTime}s</h3>
+      <h3 style={styles.timer}>Ad closes in {state.adRemainingTime}s</h3>
     </>
   );
 }
@@ -49,7 +57,7 @@ const styles = {
     width: '100%',
     height: '100%'
   },
-  chronometer: {
+  timer: {
     position: 'absolute',
     zIndex: 3,
     color: "white",
