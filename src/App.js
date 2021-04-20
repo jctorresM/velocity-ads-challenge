@@ -11,9 +11,9 @@ const initialState = {
   isSeeking: false,
   time: 0,
   isPlayingAdd: false,
-  hasAdBeenPlayed: false,
-  adStart: adsData[0].start,
-  adRemainingTime: 10
+  adsState: adsData,
+  adRemainingTime: 0,
+  currentAd: {}
 }
 
 function App() {
